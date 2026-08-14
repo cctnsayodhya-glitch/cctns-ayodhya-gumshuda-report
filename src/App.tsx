@@ -7,9 +7,10 @@ import { PSFormModal } from './components/PSFormModal';
 import { SSPReportView } from './components/SSPReportView';
 import { NotificationModal } from './components/NotificationModal';
 import { LoginModal } from './components/LoginModal';
+import { syncToGoogleSheet } from './utils/googleSheets';
 
 export const App: React.FC = () => {
-  // Auth Session State
+  // Auth Session State - Defaults to null so Login Page shows FIRST
   const [authSession, setAuthSession] = useState<AuthSession | null>(() => {
     const saved = localStorage.getItem('ayodhya_cctns_auth_v1');
     if (saved) {
@@ -19,10 +20,10 @@ export const App: React.FC = () => {
         console.error("Error parsing saved auth session", e);
       }
     }
-    return { role: 'ADMIN' }; // Default to Admin view
+    return null; // Require login first
   });
 
-  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(!authSession);
 
   // Load stations from localStorage or use initial data
   const [stations, setStations] = useState<StationData[]>(() => {
@@ -73,11 +74,15 @@ export const App: React.FC = () => {
     setShowLoginModal(true);
   };
 
-  // Handle PS Form Save
-  const handleSaveStation = (updatedStation: StationData) => {
+  // Handle PS Form Save & Sync to Google Sheet
+  const handleSaveStation = async (updatedStation: StationData) => {
     setStations((prev) =>
       prev.map((s) => (s.id === updatedStation.id ? updatedStation : s))
     );
+
+    // Sync to Google Sheet
+    await syncToGoogleSheet(updatedStation);
+
     setActiveFormStation(null);
   };
 
@@ -92,13 +97,17 @@ export const App: React.FC = () => {
       prev.map((s) => {
         if (s.id === stationId) {
           const isSubmittedNow = !s.submitted;
-          return {
+          const updated = {
             ...s,
             submitted: isSubmittedNow,
             submittedAt: isSubmittedNow
               ? new Date().toLocaleString('hi-IN', { dateStyle: 'short', timeStyle: 'short' })
               : undefined,
           };
+          if (isSubmittedNow) {
+            syncToGoogleSheet(updated);
+          }
+          return updated;
         }
         return s;
       })
@@ -108,12 +117,16 @@ export const App: React.FC = () => {
   // Auto Fill All 19 PS
   const handleAutoFillAll = () => {
     setStations((prev) =>
-      prev.map((s) => ({
-        ...s,
-        submitted: true,
-        submittedAt: new Date().toLocaleString('hi-IN', { dateStyle: 'short', timeStyle: 'short' }),
-        submittedBy: `प्रभारी निरीक्षक ${s.fullName}`,
-      }))
+      prev.map((s) => {
+        const updated = {
+          ...s,
+          submitted: true,
+          submittedAt: new Date().toLocaleString('hi-IN', { dateStyle: 'short', timeStyle: 'short' }),
+          submittedBy: `प्रभारी निरीक्षक ${s.fullName}`,
+        };
+        syncToGoogleSheet(updated);
+        return updated;
+      })
     );
   };
 
@@ -147,7 +160,7 @@ export const App: React.FC = () => {
         onLogout={handleLogout}
       />
 
-      {/* Main Dashboard View */}
+      {/* Main Dashboard View (Only visible when logged in) */}
       <Dashboard
         stations={stations}
         dateRange={dateRange}
@@ -166,8 +179,8 @@ export const App: React.FC = () => {
         <p>कार्यालय वरिष्ठ पुलिस अधीक्षक, जनपद अयोध्या • सी०सी०टी०एन०एस० (CCTNS) पाक्षिक गुमशुदा पोर्टल</p>
       </footer>
 
-      {/* Modals & Views */}
-      {showLoginModal && (
+      {/* Login Modal Landing View (Shown first when not authenticated or switching role) */}
+      {(showLoginModal || !authSession) && (
         <LoginModal
           stations={stations}
           onLogin={handleLogin}

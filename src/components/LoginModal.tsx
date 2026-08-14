@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StationData, AuthSession } from '../types/report';
-import { Shield, Building2, UserCheck, Lock, ArrowRight, ShieldAlert, Sparkles, KeyRound } from 'lucide-react';
+import { Shield, Building2, UserCheck, Lock, ArrowRight, ShieldAlert, Sparkles, KeyRound, CheckCircle2 } from 'lucide-react';
 
 interface LoginModalProps {
   stations: StationData[];
@@ -15,9 +15,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
   const [psPin, setPsPin] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const ADMIN_PASSWORD = 'Rahul@6216';
+  const PS_PASSWORD = 'cctns@1234';
+
   const handleAdminSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    if (adminPin.trim() !== ADMIN_PASSWORD) {
+      setErrorMessage(`अमान्य पासकोड! कृपया SSP Admin सही पासवर्ड दर्ज करें।`);
+      return;
+    }
+
     onLogin({
       role: 'ADMIN',
     });
@@ -26,11 +35,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
   const handlePSSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    if (psPin.trim() !== PS_PASSWORD) {
+      setErrorMessage(`अमान्य पासकोड! कृपया थाना पासवर्ड सही दर्ज करें।`);
+      return;
+    }
+
     const station = stations.find((s) => s.id === selectedStationId);
     if (!station) {
       setErrorMessage('कृपया मान्य थाना चुनें');
       return;
     }
+
     onLogin({
       role: 'PS_USER',
       stationId: station.id,
@@ -39,7 +55,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md overflow-y-auto no-print">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md overflow-y-auto no-print">
       <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden my-6">
         
         {/* Brand Top Header */}
@@ -92,7 +108,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
         <div className="p-6">
           
           {errorMessage && (
-            <div className="mb-4 p-3 bg-red-950/80 border border-red-700/80 text-red-200 text-xs rounded-xl flex items-center gap-2 font-medium">
+            <div className="mb-4 p-3 bg-red-950/90 border border-red-600 text-red-200 text-xs rounded-xl flex items-center gap-2 font-medium">
               <Lock className="w-4 h-4 text-red-400 shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -104,22 +120,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
               <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs space-y-2 text-slate-300">
                 <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
                   <UserCheck className="w-4 h-4" />
-                  <span>वरिष्ठ पुलिस अधीक्षक / नोडल अधिकारी एक्सेस</span>
+                  <span>वरिष्ठ पुलिस अधीक्षक / नोडल अधिकारी पासकोड पोर्टल</span>
                 </div>
                 <p className="text-slate-400 leading-relaxed">
-                  SSP Admin लॉग इन करके आप समस्त 19 थानों की फीडिंग स्थिति, 100% GREEN अलर्ट, WhatsApp/SMS अलर्ट प्रेषण एवं जिला संकलित SSP रिपोर्ट प्राप्त कर सकते हैं।
+                  SSP Admin डैशबोर्ड खोलने के लिए आधिकारिक पासकोड दर्ज करें।
                 </p>
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                  प्रशासक पासकोड / PIN (वैकल्पिक)
+                  प्रशासक पासवर्ड (ADMIN PASSWORD) <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
-                    placeholder="ENTER SSP ADMIN PIN (Optional)"
+                    required
+                    placeholder="पासवर्ड दर्ज करें (Rahul@6216)"
                     value={adminPin}
                     onChange={(e) => setAdminPin(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono"
@@ -131,7 +148,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
                 type="submit"
                 className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all transform hover:scale-[1.01]"
               >
-                <span>SSP ADMIN डैशबोर्ड खोलें</span>
+                <span>SSP ADMIN लॉगिन करें</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
@@ -146,14 +163,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
                   <span>थाना प्रभारी / सी०सी०टी०एन०एस० ऑपरेटर पोर्टल</span>
                 </div>
                 <p className="text-slate-400 leading-relaxed">
-                  अपना थाना चुनें एवं लाइव ड्यूटी फोटो कैप्चर (Step 1) कर 15 दिवसीय पाक्षिक रिपोर्ट सबमिट करें।
+                  अपना थाना एवं पासवर्ड दर्ज कर ड्यूटी फोटो कैप्चर एवं 15 दिवसीय सूचना सबमिट करें।
                 </p>
               </div>
 
               {/* Station Select Dropdown */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                  थाना का चयन करें (Select Police Station)
+                  थाना का चयन करें (Select Police Station) <span className="text-red-400">*</span>
                 </label>
                 <select
                   value={selectedStationId}
@@ -170,13 +187,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                  थाना लॉगिन PIN / पासकोड (वैकल्पिक)
+                  थाना पासवर्ड (PS PASSWORD) <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
-                    placeholder="ENTER THANA PIN (Optional)"
+                    required
+                    placeholder="थाना पासवर्ड दर्ज करें (cctns@1234)"
                     value={psPin}
                     onChange={(e) => setPsPin(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
@@ -201,7 +219,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
                 onClick={onClose}
                 className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
               >
-                बंद करें (Continue as View Only)
+                रद्द करें
               </button>
             </div>
           )}
@@ -210,7 +228,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
 
         {/* Footer */}
         <div className="bg-slate-950 px-6 py-3 border-t border-slate-800 text-center text-[10px] text-slate-500 font-mono">
-          CCTNS UP POLICE AYODHYA DISTRICT • SECURE AUTHENTICATION
+          CCTNS UP POLICE AYODHYA DISTRICT • SECURE AUTHENTICATION SYSTEM
         </div>
 
       </div>

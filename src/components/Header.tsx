@@ -1,6 +1,7 @@
 import React from 'react';
-import { Shield, PhoneCall, Calendar, FileText, UserCheck, LogOut, Building2, Lock } from 'lucide-react';
+import { Shield, PhoneCall, Calendar, FileText, UserCheck, Building2, Lock, Table } from 'lucide-react';
 import { DateRange, AuthSession } from '../types/report';
+import { GOOGLE_SHEET_URL } from '../utils/googleSheets';
 
 interface HeaderProps {
   dateRange: DateRange;
@@ -82,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Controls & Quick Actions */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             
             {/* Date Range Selector Pill */}
             <div className="flex items-center bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-1.5 text-xs text-slate-300">
@@ -106,14 +107,25 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
+            {/* Google Sheets Link Button */}
+            <a
+              href={GOOGLE_SHEET_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950 hover:bg-emerald-900 border border-emerald-600/70 rounded-lg text-xs font-bold text-emerald-300 transition-all shadow-sm"
+              title="Open Google Sheet Data Sync"
+            >
+              <Table className="w-3.5 h-3.5 text-emerald-400" />
+              <span>गूगल शीट</span>
+            </a>
+
             {/* Notification Direct Alert Trigger */}
             <button
               onClick={onOpenNotificationModal}
-              className="flex items-center gap-2 px-3 py-1.5 bg-blue-950/80 hover:bg-blue-900 border border-blue-700/60 rounded-lg text-xs font-semibold text-blue-200 transition-all shadow-sm hover:shadow-blue-500/20"
+              className="flex items-center gap-2 px-3 py-1.5 bg-blue-950/80 hover:bg-blue-900 border border-blue-700/60 rounded-lg text-xs font-semibold text-blue-200 transition-all shadow-sm"
               title="Click to trigger notification dispatch"
             >
               <PhoneCall className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
-              <span className="hidden sm:inline">CCTNS:</span>
               <strong className="text-white">9411626216</strong>
             </button>
 
@@ -126,14 +138,14 @@ export const Header: React.FC<HeaderProps> = ({
               <span>SSP रिपोर्ट</span>
             </button>
 
-            {/* Switch Role / Login Modal Trigger */}
+            {/* Switch Role / Logout Trigger */}
             <button
               onClick={onOpenLoginModal}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg text-xs border border-slate-700 transition-all"
               title="Switch role between SSP Admin and Police Station"
             >
               <Lock className="w-3.5 h-3.5 text-amber-400" />
-              <span>लॉगिन / रोल बदलें</span>
+              <span>लॉगिन / रोल</span>
             </button>
 
           </div>
