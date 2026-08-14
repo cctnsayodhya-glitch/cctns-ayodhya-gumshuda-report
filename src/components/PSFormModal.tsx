@@ -119,6 +119,68 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
     stopCamera();
   };
 
+  // Generate Demo Duty Officer Snapshot for testing without physical webcam
+  const handleGenerateDemoPhoto = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = 480;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Gradient Background
+    const grad = ctx.createLinearGradient(0, 0, 640, 480);
+    grad.addColorStop(0, '#0f172a');
+    grad.addColorStop(0.5, '#1e293b');
+    grad.addColorStop(1, '#020617');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 640, 480);
+
+    // Draw Badge Shield
+    ctx.beginPath();
+    ctx.arc(320, 200, 90, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(245, 158, 11, 0.15)';
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#f59e0b';
+    ctx.stroke();
+
+    ctx.fillStyle = '#f59e0b';
+    ctx.font = 'bold 48px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('👮', 320, 215);
+
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(formData.fullName, 320, 310);
+
+    ctx.font = '14px sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('CCTNS उत्तर प्रदेश पुलिस • जनपद अयोध्या', 320, 335);
+
+    // Watermark Overlay
+    const timestampStr = new Date().toLocaleString('hi-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'medium'
+    });
+
+    ctx.fillStyle = 'rgba(2, 6, 23, 0.9)';
+    ctx.fillRect(0, 435, 640, 45);
+
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillText(`★ DEMO WEBCAM SNAPSHOT • ${formData.fullName}`, 15, 455);
+
+    ctx.font = '12px monospace';
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillText(`VERIFIED AT: ${timestampStr}`, 15, 472);
+
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    setCapturedPhoto(dataUrl);
+    setPhotoTimestamp(timestampStr);
+    stopCamera();
+  };
+
   // Retake Photo
   const handleRetakePhoto = () => {
     setCapturedPhoto(null);
@@ -295,7 +357,7 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
             {/* Action Bar for Step 1 */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800">
               
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {capturedPhoto ? (
                   <button
                     type="button"
