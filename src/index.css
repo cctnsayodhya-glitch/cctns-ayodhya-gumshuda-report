@@ -36,7 +36,8 @@
     width: 100% !important;
   }
 
-  th, td {
+  th,
+  td {
     border: 1px solid #000000 !important;
     padding: 4px 6px !important;
     color: #000000 !important;
@@ -51,12 +52,15 @@
 
 /* Green Neon Alert Pulsing Animation */
 @keyframes neonGreenBlink {
-  0%, 100% {
+
+  0%,
+  100% {
     background-color: rgba(22, 163, 74, 0.95);
     box-shadow: 0 0 25px #22c55e, inset 0 0 15px #4ade80;
     border-color: #86efac;
     transform: scale(1);
   }
+
   50% {
     background-color: rgba(16, 185, 129, 0.4);
     box-shadow: 0 0 8px #15803d, inset 0 0 5px #166534;
@@ -75,7 +79,8 @@
   width: 100%;
 }
 
-.hindi-official-table th, .hindi-official-table td {
+.hindi-official-table th,
+.hindi-official-table td {
   border: 1.5px solid #1e293b;
   text-align: center;
   padding: 6px 8px;
