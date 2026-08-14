@@ -20,6 +20,18 @@ export interface StationData {
   missingChildrenFemale: number; // गुमशुदा बच्चों की संख्या महिला
   
   remarks: string; // शेष विवरण (e.g. "निल", "0")
+
+  // Duty Photo Verification
+  capturedPhoto?: string; // Base64 data URL
+  capturedPhotoTimestamp?: string; // Photo capture time
+}
+
+export type UserRole = 'ADMIN' | 'PS_USER';
+
+export interface AuthSession {
+  role: UserRole;
+  stationId?: string; // Populated for PS_USER
+  stationName?: string;
 }
 
 export interface DateRange {
@@ -37,3 +49,4 @@ export interface NotificationLog {
   type: 'SMS' | 'WHATSAPP' | 'SYSTEM_ALERT';
   status: 'SENT' | 'DELIVERED';
 }
+

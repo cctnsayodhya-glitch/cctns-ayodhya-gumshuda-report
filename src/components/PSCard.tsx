@@ -1,35 +1,40 @@
 import React from 'react';
-import { StationData } from '../types/report';
-import { CheckCircle2, Clock, FileEdit, AlertCircle, Eye, Check } from 'lucide-react';
+import { StationData, AuthSession } from '../types/report';
+import { CheckCircle2, Clock, FileEdit, AlertCircle, Check, Camera, BadgeCheck } from 'lucide-react';
 
 interface PSCardProps {
   station: StationData;
+  authSession?: AuthSession | null;
   onOpenForm: (station: StationData) => void;
   onQuickToggleStatus: (stationId: string) => void;
 }
 
 export const PSCard: React.FC<PSCardProps> = ({
   station,
+  authSession,
   onOpenForm,
   onQuickToggleStatus
 }) => {
   const isGreen = station.submitted;
-  const totalCases = 
-    station.unknownBodiesMale + 
-    station.unknownBodiesFemale + 
-    station.missingPersonsMale + 
-    station.missingPersonsFemale + 
-    station.missingChildrenMale + 
-    station.missingChildrenFemale;
+  const isMyStation = authSession?.role === 'PS_USER' && authSession.stationId === station.id;
 
   return (
     <div
       className={`relative rounded-xl border transition-all duration-300 overflow-hidden flex flex-col justify-between ${
-        isGreen
+        isMyStation
+          ? 'ring-2 ring-amber-400 bg-slate-900 border-amber-500 shadow-xl shadow-amber-500/20'
+          : isGreen
           ? 'bg-slate-900/90 border-emerald-500/70 shadow-lg shadow-emerald-950/40 hover:border-emerald-400'
           : 'bg-slate-900/80 border-red-500/70 shadow-lg shadow-red-950/40 hover:border-red-400'
       }`}
     >
+      {/* My Station Focus Badge */}
+      {isMyStation && (
+        <div className="bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 px-3 py-1 text-[11px] font-black text-center uppercase tracking-wider">
+          ★ आपका सम्बद्ध थाना (Your Station) ★
+        </div>
+      )}
+
       {/* Top Status Header Ribbon */}
       <div className={`px-4 py-2 flex items-center justify-between text-xs font-bold ${
         isGreen ? 'bg-emerald-950/90 text-emerald-300 border-b border-emerald-800/60' : 'bg-red-950/90 text-red-300 border-b border-red-800/60'
@@ -40,11 +45,21 @@ export const PSCard: React.FC<PSCardProps> = ({
             {isGreen ? 'फीडिंग पूर्ण (COMPLETED)' : 'फीडिंग लंबित (PENDING)'}
           </span>
         </div>
-        <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
-          isGreen ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-red-500/20 text-red-300 border border-red-500/40'
-        }`}>
-          {isGreen ? 'GREEN' : 'RED'}
-        </span>
+
+        <div className="flex items-center gap-1.5">
+          {station.capturedPhoto && (
+            <span className="bg-emerald-900/80 text-emerald-300 text-[10px] font-extrabold px-1.5 py-0.5 rounded border border-emerald-600 flex items-center gap-1">
+              <Camera className="w-3 h-3 text-emerald-400" />
+              <span>फोटो</span>
+            </span>
+          )}
+
+          <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+            isGreen ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-red-500/20 text-red-300 border border-red-500/40'
+          }`}>
+            {isGreen ? 'GREEN' : 'RED'}
+          </span>
+        </div>
       </div>
 
       {/* Card Content */}
@@ -62,6 +77,26 @@ export const PSCard: React.FC<PSCardProps> = ({
           </div>
           <p className="text-xs text-slate-400 mt-0.5">{station.fullName}</p>
         </div>
+
+        {/* Captured Photo Preview Badge if available */}
+        {station.capturedPhoto && (
+          <div className="flex items-center space-x-2.5 bg-slate-950 p-2 rounded-lg border border-slate-800">
+            <img
+              src={station.capturedPhoto}
+              alt="Officer Duty Verification"
+              className="w-10 h-10 object-cover rounded-md border border-slate-700 shrink-0"
+            />
+            <div className="text-[10px] text-slate-300 font-sans">
+              <span className="font-bold text-emerald-400 flex items-center gap-1">
+                <BadgeCheck className="w-3 h-3 text-emerald-400" />
+                ड्यूटी फोटो सत्यापित
+              </span>
+              <span className="text-slate-500 font-mono text-[9px] block">
+                {station.capturedPhotoTimestamp || station.submittedAt || 'सत्यापित'}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Stats Preview Box */}
         {isGreen ? (
@@ -113,22 +148,15 @@ export const PSCard: React.FC<PSCardProps> = ({
           <button
             onClick={() => onOpenForm(station)}
             className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md ${
-              isGreen
+              isMyStation
+                ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 hover:from-amber-400 hover:to-yellow-400'
+                : isGreen
                 ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
                 : 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white shadow-red-900/30'
             }`}
           >
-            {isGreen ? (
-              <>
-                <FileEdit className="w-3.5 h-3.5 text-amber-400" />
-                <span>रिपोर्ट देखें / संशोधन</span>
-              </>
-            ) : (
-              <>
-                <FileEdit className="w-3.5 h-3.5 text-white" />
-                <span>पत्र प्रपत्र भरें (Fill Form)</span>
-              </>
-            )}
+            <FileEdit className="w-3.5 h-3.5" />
+            <span>{isGreen ? 'रिपोर्ट देखें / संशोधन' : 'पत्र प्रपत्र भरें (Fill Form)'}</span>
           </button>
 
           {/* Quick toggle checkmark */}

@@ -1,14 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { StationData, DateRange, NotificationLog } from './types/report';
+import { StationData, DateRange, NotificationLog, AuthSession } from './types/report';
 import { INITIAL_POLICE_STATIONS } from './data/policeStations';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { PSFormModal } from './components/PSFormModal';
 import { SSPReportView } from './components/SSPReportView';
 import { NotificationModal } from './components/NotificationModal';
+import { LoginModal } from './components/LoginModal';
 
 export const App: React.FC = () => {
-  // Load state from localStorage or use initial data
+  // Auth Session State
+  const [authSession, setAuthSession] = useState<AuthSession | null>(() => {
+    const saved = localStorage.getItem('ayodhya_cctns_auth_v1');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Error parsing saved auth session", e);
+      }
+    }
+    return { role: 'ADMIN' }; // Default to Admin view
+  });
+
+  const [showLoginModal, setShowLoginModal] = useState<boolean>(false);
+
+  // Load stations from localStorage or use initial data
   const [stations, setStations] = useState<StationData[]>(() => {
     const saved = localStorage.getItem('ayodhya_cctns_stations_v2');
     if (saved) {
@@ -37,6 +53,25 @@ export const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('ayodhya_cctns_stations_v2', JSON.stringify(stations));
   }, [stations]);
+
+  // Save Auth session
+  useEffect(() => {
+    if (authSession) {
+      localStorage.setItem('ayodhya_cctns_auth_v1', JSON.stringify(authSession));
+    } else {
+      localStorage.removeItem('ayodhya_cctns_auth_v1');
+    }
+  }, [authSession]);
+
+  const handleLogin = (session: AuthSession) => {
+    setAuthSession(session);
+    setShowLoginModal(false);
+  };
+
+  const handleLogout = () => {
+    setAuthSession(null);
+    setShowLoginModal(true);
+  };
 
   // Handle PS Form Save
   const handleSaveStation = (updatedStation: StationData) => {
@@ -105,20 +140,25 @@ export const App: React.FC = () => {
         setDateRange={setDateRange}
         completedCount={completedCount}
         totalCount={stations.length}
+        authSession={authSession}
         onOpenNotificationModal={() => setShowNotificationModal(true)}
         onOpenSSPReport={() => setShowSSPReport(true)}
+        onOpenLoginModal={() => setShowLoginModal(true)}
+        onLogout={handleLogout}
       />
 
       {/* Main Dashboard View */}
       <Dashboard
         stations={stations}
         dateRange={dateRange}
+        authSession={authSession}
         onOpenForm={(st) => setActiveFormStation(st)}
         onQuickToggleStatus={handleQuickToggleStatus}
         onAutoFillAll={handleAutoFillAll}
         onResetAll={handleResetAll}
         onOpenSSPReport={() => setShowSSPReport(true)}
         onOpenNotificationModal={() => setShowNotificationModal(true)}
+        onOpenLoginModal={() => setShowLoginModal(true)}
       />
 
       {/* Footer */}
@@ -127,6 +167,14 @@ export const App: React.FC = () => {
       </footer>
 
       {/* Modals & Views */}
+      {showLoginModal && (
+        <LoginModal
+          stations={stations}
+          onLogin={handleLogin}
+          onClose={authSession ? () => setShowLoginModal(false) : undefined}
+        />
+      )}
+
       {activeFormStation && (
         <PSFormModal
           station={activeFormStation}

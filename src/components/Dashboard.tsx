@@ -1,51 +1,61 @@
 import React, { useState } from 'react';
-import { StationData, DateRange } from '../types/report';
+import { StationData, DateRange, AuthSession } from '../types/report';
 import { PSCard } from './PSCard';
 import { 
   ShieldCheck, 
   AlertCircle, 
   CheckCircle2, 
-  UserCheck, 
   Search, 
-  Filter, 
   Zap, 
   RotateCcw, 
   FileText, 
   PhoneCall, 
   BellRing,
   Users,
-  AlertTriangle
+  Building2,
+  UserCheck,
+  Lock,
+  Camera
 } from 'lucide-react';
 
 interface DashboardProps {
   stations: StationData[];
   dateRange: DateRange;
+  authSession: AuthSession | null;
   onOpenForm: (station: StationData) => void;
   onQuickToggleStatus: (stationId: string) => void;
   onAutoFillAll: () => void;
   onResetAll: () => void;
   onOpenSSPReport: () => void;
   onOpenNotificationModal: () => void;
+  onOpenLoginModal: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
   stations,
   dateRange,
+  authSession,
   onOpenForm,
   onQuickToggleStatus,
   onAutoFillAll,
   onResetAll,
   onOpenSSPReport,
   onOpenNotificationModal,
+  onOpenLoginModal,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'GREEN' | 'RED'>('ALL');
+
+  const isAdmin = authSession?.role === 'ADMIN';
+  const isPSUser = authSession?.role === 'PS_USER';
 
   // Calculated Stats
   const totalStations = stations.length;
   const completedCount = stations.filter((s) => s.submitted).length;
   const pendingCount = totalStations - completedCount;
   const is100PercentCompleted = completedCount === totalStations && totalStations > 0;
+
+  const myStation = isPSUser ? stations.find((s) => s.id === authSession.stationId) : null;
 
   const totals = stations.reduce(
     (acc, st) => {
@@ -69,6 +79,41 @@ export const Dashboard: React.FC<DashboardProps> = ({
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 no-print">
       
+      {/* PS USER DASHBOARD FOCUS BANNER */}
+      {isPSUser && myStation && (
+        <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 p-6 rounded-2xl border-2 border-blue-500/70 shadow-2xl relative overflow-hidden">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+            <div className="flex items-center space-x-4">
+              <div className="w-14 h-14 rounded-full bg-blue-900/80 border-2 border-blue-400 flex items-center justify-center shrink-0 shadow-lg">
+                <Building2 className="w-8 h-8 text-blue-300" />
+              </div>
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-0.5 bg-blue-900/80 text-blue-200 rounded-full border border-blue-500/60 text-xs font-black uppercase tracking-wider mb-1">
+                  <span>थाना यूजर सम्बद्ध: {myStation.fullName}</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  {myStation.fullName} ({myStation.code}) - 15 दिवसीय पाषिक प्रपत्र
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
+                  स्थिति: {myStation.submitted ? <strong className="text-emerald-400">फीडिंग पूर्ण (GREEN ✓)</strong> : <strong className="text-red-400">फीडिंग बाकी (RED ⏳)</strong>}
+                  {myStation.capturedPhoto && ' • फोटो सत्यापित 📷'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={() => onOpenForm(myStation)}
+                className="px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-xl transition-all transform hover:scale-105"
+              >
+                <Camera className="w-4 h-4" />
+                <span>{myStation.submitted ? 'संशोधन / फोटो बदलें' : 'Step 1: फोटो लें & रिपोर्ट भरें'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* GREEN BLINK ALERT BANNER - Triggered when all 19 PS complete submission */}
       {is100PercentCompleted && (
         <div className="rounded-2xl p-6 border-2 border-emerald-400 green-blink-active text-white shadow-2xl relative overflow-hidden transition-all">
@@ -105,7 +150,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 className="px-5 py-2.5 bg-slate-950 hover:bg-slate-900 text-amber-300 font-extrabold rounded-xl text-xs flex items-center gap-2 shadow-lg border border-amber-400 transition-all transform hover:scale-105"
               >
                 <FileText className="w-4 h-4 text-amber-400" />
-                <span>SSP जिला रिपोर्ट देखें (Image 2)</span>
+                <span>SSP जिला रिपोर्ट देखें</span>
               </button>
             </div>
           </div>
@@ -250,7 +295,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
 
-        {/* Quick Demo Controls */}
+        {/* Quick Controls */}
         <div className="flex items-center space-x-2 w-full md:w-auto justify-end">
           <button
             onClick={onAutoFillAll}
@@ -278,6 +323,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <PSCard
             key={station.id}
             station={station}
+            authSession={authSession}
             onOpenForm={onOpenForm}
             onQuickToggleStatus={onQuickToggleStatus}
           />
