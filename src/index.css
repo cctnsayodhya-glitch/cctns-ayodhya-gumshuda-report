@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Hind', 'Noto Sans Devanagari', 'Inter', sans-serif;
+  }
+}
+
+/* Custom CSS for Official Print Reports (Image 1 & Image 2 replicas) */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-paper {
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+  }
+
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  th, td {
+    border: 1px solid #000000 !important;
+    padding: 4px 6px !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 15mm 15mm 15mm 15mm;
+  }
+}
+
+/* Green Neon Alert Pulsing Animation */
+@keyframes neonGreenBlink {
+  0%, 100% {
+    background-color: rgba(22, 163, 74, 0.95);
+    box-shadow: 0 0 25px #22c55e, inset 0 0 15px #4ade80;
+    border-color: #86efac;
+    transform: scale(1);
+  }
+  50% {
+    background-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 8px #15803d, inset 0 0 5px #166534;
+    border-color: #16a34a;
+    transform: scale(1.008);
+  }
+}
+
+.green-blink-active {
+  animation: neonGreenBlink 1.2s infinite ease-in-out;
+}
+
+/* Hindi Table Border Grid */
+.hindi-official-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.hindi-official-table th, .hindi-official-table td {
+  border: 1.5px solid #1e293b;
+  text-align: center;
+  padding: 6px 8px;
+}
