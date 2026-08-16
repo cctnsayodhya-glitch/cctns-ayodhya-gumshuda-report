@@ -32,6 +32,7 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
 
   const [step, setStep] = useState<1 | 2>(1); // Step 1: Photo capture, Step 2: Form feeding
   const [formData, setFormData] = useState<StationData>({ ...station });
+  const [localDateRange, setLocalDateRange] = useState<DateRange>({ ...dateRange });
 
   // Camera & Photo Capture States
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -413,11 +414,29 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
               {/* Printable Official Paper Card */}
               <div className="bg-white text-slate-950 p-6 md:p-8 rounded-lg shadow-xl border border-slate-300 font-serif print-paper space-y-6">
                 
-                {/* Header Title Line */}
-                <div className="text-center md:text-left">
-                  <p className="text-base md:text-lg font-bold underline leading-relaxed text-slate-900">
-                    दिनांक <span className="font-semibold text-blue-900">{dateRange.fromDate}</span> से दिनांक <span className="font-semibold text-blue-900">{dateRange.toDate}</span> तक गुमशुदा, अज्ञात व्यक्तियों के सम्बन्ध में {formData.fullName} से सूचना निम्नवत है:-
-                  </p>
+                {/* Header Title Line with Manual Date Inputs */}
+                <div className="text-center md:text-left bg-slate-50/80 p-2.5 rounded-lg border border-slate-300">
+                  <div className="flex flex-wrap items-center gap-1.5 text-sm md:text-base font-bold text-slate-900 leading-relaxed">
+                    <span>दिनांक</span>
+                    <input
+                      type="text"
+                      value={localDateRange.fromDate}
+                      onChange={(e) => setLocalDateRange({ ...localDateRange, fromDate: e.target.value })}
+                      className="bg-amber-50 border border-slate-400 text-blue-900 font-extrabold text-center w-28 rounded px-1.5 py-0.5 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                      placeholder="15.07.2026"
+                      title="गुमशुदा अवधि प्रारम्भ दिनांक (Manual Date)"
+                    />
+                    <span>से दिनांक</span>
+                    <input
+                      type="text"
+                      value={localDateRange.toDate}
+                      onChange={(e) => setLocalDateRange({ ...localDateRange, toDate: e.target.value })}
+                      className="bg-amber-50 border border-slate-400 text-blue-900 font-extrabold text-center w-28 rounded px-1.5 py-0.5 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                      placeholder="31.07.2026"
+                      title="गुमशुदा अवधि अंतिम दिनांक (Manual Date)"
+                    />
+                    <span>तक गुमशुदा, अज्ञात व्यक्तियों के सम्बन्ध में {formData.fullName} से सूचना निम्नवत है:-</span>
+                  </div>
                 </div>
 
                 {/* Main Feeding Table */}
@@ -568,10 +587,18 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
                     </div>
                   )}
 
-                  {/* Stamp Signature Block */}
+                  {/* Stamp Signature Block with Manual Date */}
                   <div className="text-right space-y-1 relative pr-4">
-                    <div className="font-serif italic font-bold text-blue-900 text-lg border-b border-blue-900 inline-block pb-0.5 px-4">
-                      Sho. {dateRange.letterDate}
+                    <div className="font-serif italic font-bold text-blue-900 text-base md:text-lg border-b border-blue-900 inline-flex items-center justify-end gap-1 pb-0.5 px-2">
+                      <span>Sho.</span>
+                      <input
+                        type="text"
+                        value={localDateRange.letterDate}
+                        onChange={(e) => setLocalDateRange({ ...localDateRange, letterDate: e.target.value })}
+                        className="bg-amber-50/60 border border-slate-400 text-blue-900 font-bold text-center w-28 rounded px-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="01.08.2026"
+                        title="थाना प्रपत्र दिनांक (Manual Date)"
+                      />
                     </div>
                     <p className="font-bold text-slate-900 text-sm leading-snug">प्रभारी निरीक्षक</p>
                     <p className="font-bold text-slate-900 text-sm leading-snug">{formData.fullName}</p>

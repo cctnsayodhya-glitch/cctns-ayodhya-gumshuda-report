@@ -7,6 +7,7 @@ import { PSFormModal } from './components/PSFormModal';
 import { SSPReportView } from './components/SSPReportView';
 import { NotificationModal } from './components/NotificationModal';
 import { LoginModal } from './components/LoginModal';
+import { AboutModal } from './components/AboutModal';
 import { syncToGoogleSheet } from './utils/googleSheets';
 
 export const App: React.FC = () => {
@@ -48,6 +49,7 @@ export const App: React.FC = () => {
   const [activeFormStation, setActiveFormStation] = useState<StationData | null>(null);
   const [showSSPReport, setShowSSPReport] = useState<boolean>(false);
   const [showNotificationModal, setShowNotificationModal] = useState<boolean>(false);
+  const [showAboutModal, setShowAboutModal] = useState<boolean>(false);
   const [notificationLogs, setNotificationLogs] = useState<NotificationLog[]>([]);
 
   // Save to localStorage on stations update
@@ -144,6 +146,22 @@ export const App: React.FC = () => {
 
   const completedCount = stations.filter((s) => s.submitted).length;
 
+  // If user is not authenticated, display the Login Page landing view FIRST
+  if (!authSession) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+        <LoginModal
+          stations={stations}
+          onLogin={handleLogin}
+          onOpenAboutModal={() => setShowAboutModal(true)}
+        />
+        {showAboutModal && (
+          <AboutModal onClose={() => setShowAboutModal(false)} />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       
@@ -157,10 +175,11 @@ export const App: React.FC = () => {
         onOpenNotificationModal={() => setShowNotificationModal(true)}
         onOpenSSPReport={() => setShowSSPReport(true)}
         onOpenLoginModal={() => setShowLoginModal(true)}
+        onOpenAboutModal={() => setShowAboutModal(true)}
         onLogout={handleLogout}
       />
 
-      {/* Main Dashboard View (Only visible when logged in) */}
+      {/* Main Dashboard View */}
       <Dashboard
         stations={stations}
         dateRange={dateRange}
@@ -175,16 +194,26 @@ export const App: React.FC = () => {
       />
 
       {/* Footer */}
-      <footer className="mt-auto bg-slate-950 border-t border-slate-900 py-4 text-center text-xs text-slate-500 no-print">
+      <footer className="mt-auto bg-slate-950 border-t border-slate-900 py-4 px-4 text-center text-xs text-slate-500 no-print flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto w-full">
         <p>कार्यालय वरिष्ठ पुलिस अधीक्षक, जनपद अयोध्या • सी०सी०टी०एन०एस० (CCTNS) पाक्षिक गुमशुदा पोर्टल</p>
+        <div className="flex items-center gap-2">
+          <span>पोर्टल निर्माता: <strong className="text-slate-300">Rahul Yadav</strong> (सेल: CCTNS Ayodhya, 9411626216)</span>
+          <button
+            onClick={() => setShowAboutModal(true)}
+            className="text-amber-400 font-bold hover:underline ml-1"
+          >
+            [हमारे बारे में]
+          </button>
+        </div>
       </footer>
 
-      {/* Login Modal Landing View (Shown first when not authenticated or switching role) */}
-      {(showLoginModal || !authSession) && (
+      {/* Login Modal Overlay for switching roles while authenticated */}
+      {showLoginModal && (
         <LoginModal
           stations={stations}
           onLogin={handleLogin}
-          onClose={authSession ? () => setShowLoginModal(false) : undefined}
+          onClose={() => setShowLoginModal(false)}
+          onOpenAboutModal={() => setShowAboutModal(true)}
         />
       )}
 
@@ -218,6 +247,10 @@ export const App: React.FC = () => {
           onClose={() => setShowNotificationModal(false)}
           onSendNotification={handleSendNotification}
         />
+      )}
+
+      {showAboutModal && (
+        <AboutModal onClose={() => setShowAboutModal(false)} />
       )}
 
     </div>

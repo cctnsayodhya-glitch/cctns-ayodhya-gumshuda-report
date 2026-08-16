@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { StationData, AuthSession } from '../types/report';
-import { Shield, Building2, UserCheck, Lock, ArrowRight, ShieldAlert, Sparkles, KeyRound, CheckCircle2 } from 'lucide-react';
+import { Shield, Building2, UserCheck, Lock, ArrowRight, ShieldAlert, Sparkles, KeyRound, Eye, EyeOff } from 'lucide-react';
 
 interface LoginModalProps {
   stations: StationData[];
   onLogin: (session: AuthSession) => void;
   onClose?: () => void;
+  onOpenAboutModal?: () => void;
 }
 
-export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClose }) => {
+export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClose, onOpenAboutModal }) => {
   const [activeTab, setActiveTab] = useState<'ADMIN' | 'PS_USER'>('ADMIN');
   const [selectedStationId, setSelectedStationId] = useState<string>(stations[0]?.id || 'ps-1');
   const [adminPin, setAdminPin] = useState<string>('');
   const [psPin, setPsPin] = useState<string>('');
+  const [showAdminPassword, setShowAdminPassword] = useState<boolean>(false);
+  const [showPsPassword, setShowPsPassword] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const ADMIN_PASSWORD = 'Rahul@6216';
@@ -55,7 +58,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md overflow-y-auto no-print">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/98 backdrop-blur-md overflow-y-auto no-print min-h-screen">
       <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden my-6">
         
         {/* Brand Top Header */}
@@ -134,13 +137,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
                 <div className="relative">
                   <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
-                    type="password"
+                    type={showAdminPassword ? 'text' : 'password'}
                     required
-                    placeholder="पासवर्ड दर्ज करें (Rahul@6216)"
+                    placeholder="पासवर्ड दर्ज करें"
                     value={adminPin}
                     onChange={(e) => setAdminPin(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-500 focus:outline-none font-mono"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowAdminPassword(!showAdminPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    title={showAdminPassword ? "पासवर्ड छिपाएं" : "पासवर्ड देखें"}
+                  >
+                    {showAdminPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -192,13 +203,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
                 <div className="relative">
                   <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
-                    type="password"
+                    type={showPsPassword ? 'text' : 'password'}
                     required
-                    placeholder="थाना पासवर्ड दर्ज करें (cctns@1234)"
+                    placeholder="थाना पासवर्ड दर्ज करें"
                     value={psPin}
                     onChange={(e) => setPsPin(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPsPassword(!showPsPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    title={showPsPassword ? "पासवर्ड छिपाएं" : "पासवर्ड देखें"}
+                  >
+                    {showPsPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -227,11 +246,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-950 px-6 py-3 border-t border-slate-800 text-center text-[10px] text-slate-500 font-mono">
-          CCTNS UP POLICE AYODHYA DISTRICT • SECURE AUTHENTICATION SYSTEM
+        <div className="bg-slate-950 px-6 py-3 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-slate-500 font-mono">
+          <span>CCTNS UP POLICE AYODHYA DISTRICT • SECURE AUTHENTICATION SYSTEM</span>
+          {onOpenAboutModal && (
+            <button
+              type="button"
+              onClick={onOpenAboutModal}
+              className="text-amber-400 font-bold hover:underline"
+            >
+              हमारे बारे में (About Us)
+            </button>
+          )}
         </div>
 
       </div>
     </div>
   );
 };
+

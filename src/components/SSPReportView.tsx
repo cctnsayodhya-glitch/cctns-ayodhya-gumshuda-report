@@ -20,6 +20,7 @@ export const SSPReportView: React.FC<SSPReportViewProps> = ({
   const [includeSignatureAndDate, setIncludeSignatureAndDate] = useState<boolean>(false); // Default: Without sign & date as requested
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [editableStations, setEditableStations] = useState<StationData[]>([...stations]);
+  const [localDateRange, setLocalDateRange] = useState<DateRange>({ ...dateRange });
 
   // Handle cell edits in table
   const handleCellChange = (stationId: string, field: keyof StationData, value: any) => {
@@ -142,11 +143,29 @@ export const SSPReportView: React.FC<SSPReportViewProps> = ({
                 <h1 className="text-2xl sm:text-3xl font-black tracking-wide text-slate-950">
                   कार्यालय वरिष्ठ पुलिस अधीक्षक जनपद अयोध्या।
                 </h1>
-                <div className="flex justify-between items-center text-sm sm:text-base font-bold pt-3 text-slate-900">
-                  <span>पत्र संख्या- {dateRange.letterNo}</span>
-                  <span>
-                    दिनांक-अगस्त, {includeSignatureAndDate ? (dateRange.letterDate.split('.')[0] || '01') : '____'} ,2026
-                  </span>
+                <div className="flex flex-wrap justify-between items-center text-sm sm:text-base font-bold pt-3 text-slate-900 gap-2">
+                  <div className="flex items-center gap-1">
+                    <span>पत्र संख्या-</span>
+                    <input
+                      type="text"
+                      value={localDateRange.letterNo}
+                      onChange={(e) => setLocalDateRange({ ...localDateRange, letterNo: e.target.value })}
+                      className="bg-amber-50 border border-slate-400 text-blue-900 font-bold text-center w-36 rounded px-1 text-xs sm:text-sm focus:outline-none"
+                      placeholder="सी०गु०पा०/2026"
+                      title="पत्र संख्या मैनुअल दर्ज करें"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span>दिनांक-</span>
+                    <input
+                      type="text"
+                      value={localDateRange.letterDate}
+                      onChange={(e) => setLocalDateRange({ ...localDateRange, letterDate: e.target.value })}
+                      className="bg-amber-50 border border-slate-400 text-blue-900 font-bold text-center w-28 rounded px-1 text-xs sm:text-sm focus:outline-none"
+                      placeholder="01.08.2026"
+                      title="पत्र दिनांक मैनुअल दर्ज करें"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -162,9 +181,27 @@ export const SSPReportView: React.FC<SSPReportViewProps> = ({
                 <p className="indent-8">
                   कृपया अपने पत्र संख्या-सीसीटीएनएस-फीडिंग-2024 का संदर्भ ग्रहण करने का कष्ट करें, जिसके माध्यम से सी०सी०टी०एन०एस० पोर्टल पर अज्ञात शवों तथा गुमशुदा व्यक्तियों एवं बच्चों के सम्बन्ध में फीडिंग की अद्यावधिक स्थिति से अवगत कराते हुये कितनी फीडिंग की गयी है तथा कितनी शेष है के सम्बन्ध में वांछित सूचना उपलब्ध कराये जाने विषयक है।
                 </p>
-                <p className="indent-8">
-                  उपरोक्त सम्बन्ध में जनपद अयोध्या से दिनांक <span className="font-bold">{dateRange.fromDate}</span> से <span className="font-bold">{dateRange.toDate}</span> तक की सूचना प्रारूपानुसार निम्नवत् है –
-                </p>
+                <div className="indent-8 flex flex-wrap items-center gap-1">
+                  <span>उपरोक्त सम्बन्ध में जनपद अयोध्या से दिनांक</span>
+                  <input
+                    type="text"
+                    value={localDateRange.fromDate}
+                    onChange={(e) => setLocalDateRange({ ...localDateRange, fromDate: e.target.value })}
+                    className="bg-amber-50 border border-slate-400 text-blue-900 font-bold text-center w-28 rounded px-1 text-xs sm:text-sm focus:outline-none"
+                    placeholder="15.07.2026"
+                    title="प्रारम्भ दिनांक मैनुअल फॉर्मैट"
+                  />
+                  <span>से</span>
+                  <input
+                    type="text"
+                    value={localDateRange.toDate}
+                    onChange={(e) => setLocalDateRange({ ...localDateRange, toDate: e.target.value })}
+                    className="bg-amber-50 border border-slate-400 text-blue-900 font-bold text-center w-28 rounded px-1 text-xs sm:text-sm focus:outline-none"
+                    placeholder="31.07.2026"
+                    title="अंतिम दिनांक मैनुअल फॉर्मैट"
+                  />
+                  <span>तक की सूचना प्रारूपानुसार निम्नवत् है –</span>
+                </div>
               </div>
 
               {/* Table 1: Aggregate Summary Table (Exact replica of Image 1 top table) */}
@@ -250,8 +287,26 @@ export const SSPReportView: React.FC<SSPReportViewProps> = ({
             {/* PAGE 2: 19 POLICE STATIONS DETAILED BREAKDOWN TABLE (Image 2 of second attachment) */}
             <div className="space-y-4 pt-2">
               
-              <div className="text-center font-bold text-slate-950 underline text-sm sm:text-base leading-snug">
-                दिनांक {dateRange.fromDate} से {dateRange.toDate} तक अज्ञात शव, गुमशुदा व्यक्ति, गुमशुदा बच्चों से सम्बन्धित सूचना जनपद अयोध्या
+              <div className="text-center font-bold text-slate-950 underline text-sm sm:text-base leading-snug flex flex-wrap items-center justify-center gap-1">
+                <span>दिनांक</span>
+                <input
+                  type="text"
+                  value={localDateRange.fromDate}
+                  onChange={(e) => setLocalDateRange({ ...localDateRange, fromDate: e.target.value })}
+                  className="bg-amber-50 border border-slate-400 text-blue-900 font-bold text-center w-28 rounded px-1 text-xs sm:text-sm focus:outline-none"
+                  placeholder="15.07.2026"
+                  title="प्रारम्भ दिनांक"
+                />
+                <span>से</span>
+                <input
+                  type="text"
+                  value={localDateRange.toDate}
+                  onChange={(e) => setLocalDateRange({ ...localDateRange, toDate: e.target.value })}
+                  className="bg-amber-50 border border-slate-400 text-blue-900 font-bold text-center w-28 rounded px-1 text-xs sm:text-sm focus:outline-none"
+                  placeholder="31.07.2026"
+                  title="अंतिम दिनांक"
+                />
+                <span>तक अज्ञात शव, गुमशुदा व्यक्ति, गुमशुदा बच्चों से सम्बन्धित सूचना जनपद अयोध्या</span>
               </div>
 
               {isEditMode && (

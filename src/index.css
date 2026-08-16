@@ -44,6 +44,14 @@
     font-size: 11pt !important;
   }
 
+  input, select, textarea {
+    border: none !important;
+    background: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+  }
+
   @page {
     size: A4 portrait;
     margin: 15mm 15mm 15mm 15mm;

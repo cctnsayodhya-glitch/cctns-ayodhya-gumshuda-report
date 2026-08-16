@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, PhoneCall, Calendar, FileText, UserCheck, Building2, Lock, Table } from 'lucide-react';
+import { Shield, PhoneCall, Calendar, FileText, UserCheck, Building2, Lock, Table, Info } from 'lucide-react';
 import { DateRange, AuthSession } from '../types/report';
 import { GOOGLE_SHEET_URL } from '../utils/googleSheets';
 
@@ -12,6 +12,7 @@ interface HeaderProps {
   onOpenNotificationModal: () => void;
   onOpenSSPReport: () => void;
   onOpenLoginModal: () => void;
+  onOpenAboutModal: () => void;
   onLogout: () => void;
 }
 
@@ -24,6 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenNotificationModal,
   onOpenSSPReport,
   onOpenLoginModal,
+  onOpenAboutModal,
   onLogout,
 }) => {
   const isAdmin = authSession?.role === 'ADMIN';
@@ -85,24 +87,51 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Controls & Quick Actions */}
           <div className="flex flex-wrap items-center gap-2">
             
-            {/* Date Range Selector Pill */}
-            <div className="flex items-center bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-1.5 text-xs text-slate-300">
-              <Calendar className="w-4 h-4 text-amber-400 mr-2 shrink-0" />
+            {/* Date Range Selector Pill with all 4 manual format inputs */}
+            <div className="flex flex-wrap items-center bg-slate-950 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 gap-2">
               <div className="flex items-center space-x-1">
+                <Calendar className="w-4 h-4 text-amber-400 shrink-0" />
+                <span className="text-[10px] font-bold text-slate-400 uppercase">अवधि:</span>
                 <input
                   type="text"
                   value={dateRange.fromDate}
                   onChange={(e) => setDateRange({ ...dateRange, fromDate: e.target.value })}
-                  className="bg-transparent text-white font-medium text-center w-20 focus:outline-none focus:ring-1 focus:ring-amber-500 rounded px-1"
+                  className="bg-slate-900 border border-slate-700 text-white font-medium text-center w-20 focus:outline-none focus:ring-1 focus:ring-amber-500 rounded px-1 text-xs"
                   placeholder="15.07.2026"
+                  title="गुमशुदा अवधि प्रारम्भ दिनांक (Manual Date)"
                 />
-                <span className="text-slate-500">से</span>
+                <span className="text-slate-500 text-[11px]">से</span>
                 <input
                   type="text"
                   value={dateRange.toDate}
                   onChange={(e) => setDateRange({ ...dateRange, toDate: e.target.value })}
-                  className="bg-transparent text-white font-medium text-center w-20 focus:outline-none focus:ring-1 focus:ring-amber-500 rounded px-1"
+                  className="bg-slate-900 border border-slate-700 text-white font-medium text-center w-20 focus:outline-none focus:ring-1 focus:ring-amber-500 rounded px-1 text-xs"
                   placeholder="31.07.2026"
+                  title="गुमशुदा अवधि अंतिम दिनांक (Manual Date)"
+                />
+              </div>
+
+              <div className="flex items-center space-x-1 pl-2 border-l border-slate-800">
+                <span className="text-[10px] font-bold text-amber-400 uppercase">पत्र तिथि:</span>
+                <input
+                  type="text"
+                  value={dateRange.letterDate}
+                  onChange={(e) => setDateRange({ ...dateRange, letterDate: e.target.value })}
+                  className="bg-slate-900 border border-slate-700 text-white font-medium text-center w-20 focus:outline-none focus:ring-1 focus:ring-amber-500 rounded px-1 text-xs"
+                  placeholder="01.08.2026"
+                  title="रिपोर्ट पत्र दिनांक (Manual Date)"
+                />
+              </div>
+
+              <div className="hidden sm:flex items-center space-x-1 pl-2 border-l border-slate-800">
+                <span className="text-[10px] font-bold text-blue-400 uppercase">पत्र सं०:</span>
+                <input
+                  type="text"
+                  value={dateRange.letterNo}
+                  onChange={(e) => setDateRange({ ...dateRange, letterNo: e.target.value })}
+                  className="bg-slate-900 border border-slate-700 text-white font-medium text-center w-24 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 text-xs"
+                  placeholder="सी०गु०पा०/2026"
+                  title="पत्र संख्या"
                 />
               </div>
             </div>
@@ -136,6 +165,16 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <FileText className="w-3.5 h-3.5 text-slate-950" />
               <span>SSP रिपोर्ट</span>
+            </button>
+
+            {/* About Us Creator Info Button */}
+            <button
+              onClick={onOpenAboutModal}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold rounded-lg text-xs border border-amber-500/40 transition-all shadow-sm"
+              title="About Us - Creator Info (Rahul Yadav, CCTNS Cell Ayodhya)"
+            >
+              <Info className="w-3.5 h-3.5 text-amber-400" />
+              <span>हमारे बारे में</span>
             </button>
 
             {/* Switch Role / Logout Trigger */}
