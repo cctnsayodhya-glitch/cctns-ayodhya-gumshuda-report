@@ -10,9 +10,9 @@ import {
   Upload, 
   Check, 
   AlertTriangle,
-  ArrowRight,
-  ArrowLeft,
-  BadgeCheck
+  BadgeCheck,
+  Zap,
+  Sparkles
 } from 'lucide-react';
 
 interface PSFormModalProps {
@@ -30,7 +30,6 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
 }) => {
   if (!station) return null;
 
-  const [step, setStep] = useState<1 | 2>(1); // Step 1: Photo capture, Step 2: Form feeding
   const [formData, setFormData] = useState<StationData>({ ...station });
   const [localDateRange, setLocalDateRange] = useState<DateRange>({ ...dateRange });
 
@@ -42,18 +41,16 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
   const [capturedPhoto, setCapturedPhoto] = useState<string | null>(station.capturedPhoto || null);
   const [photoTimestamp, setPhotoTimestamp] = useState<string | null>(station.capturedPhotoTimestamp || null);
 
-  // Initialize Camera Stream for Step 1
+  // Initialize Camera Stream automatically if photo not yet captured
   useEffect(() => {
-    let stream: MediaStream | null = null;
-
-    if (step === 1 && !capturedPhoto) {
+    if (!capturedPhoto) {
       startCamera();
     }
 
     return () => {
       stopCamera();
     };
-  }, [step]);
+  }, []);
 
   const startCamera = async () => {
     setCameraError(null);
@@ -67,7 +64,7 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
       setIsCameraActive(true);
     } catch (err) {
       console.warn("Camera access failed:", err);
-      setCameraError("कैमरा एक्सेस उपलब्ध नहीं है। कृपया 'फाइल अपलोड' बटन का उपयोग करें या डिफ़ॉल्ट सील का चयन करें।");
+      setCameraError("कैमरा एक्सेस उपलब्ध नहीं है। कृपया 'फाइल से अपलोड' करें या 'डेमो फोटो' चुनें।");
       setIsCameraActive(false);
     }
   };
@@ -103,7 +100,7 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
       timeStyle: 'medium'
     });
 
-    ctx.fillStyle = 'rgba(2, 6, 23, 0.75)';
+    ctx.fillStyle = 'rgba(2, 6, 23, 0.8)';
     ctx.fillRect(0, canvas.height - 45, canvas.width, 45);
 
     ctx.font = 'bold 14px sans-serif';
@@ -120,7 +117,7 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
     stopCamera();
   };
 
-  // Generate Demo Duty Officer Snapshot for testing without physical webcam
+  // Generate Demo Duty Officer Snapshot
   const handleGenerateDemoPhoto = () => {
     const canvas = document.createElement('canvas');
     canvas.width = 640;
@@ -128,7 +125,6 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Gradient Background
     const grad = ctx.createLinearGradient(0, 0, 640, 480);
     grad.addColorStop(0, '#0f172a');
     grad.addColorStop(0.5, '#1e293b');
@@ -136,7 +132,6 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 640, 480);
 
-    // Draw Badge Shield
     ctx.beginPath();
     ctx.arc(320, 200, 90, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(245, 158, 11, 0.15)';
@@ -158,7 +153,6 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
     ctx.fillStyle = '#94a3b8';
     ctx.fillText('CCTNS उत्तर प्रदेश पुलिस • जनपद अयोध्या', 320, 335);
 
-    // Watermark Overlay
     const timestampStr = new Date().toLocaleString('hi-IN', {
       dateStyle: 'medium',
       timeStyle: 'medium'
@@ -170,7 +164,7 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
     ctx.textAlign = 'left';
     ctx.font = 'bold 13px sans-serif';
     ctx.fillStyle = '#f59e0b';
-    ctx.fillText(`★ DEMO WEBCAM SNAPSHOT • ${formData.fullName}`, 15, 455);
+    ctx.fillText(`★ DEMO SNAPSHOT • ${formData.fullName}`, 15, 455);
 
     ctx.font = '12px monospace';
     ctx.fillStyle = '#38bdf8';
@@ -182,14 +176,12 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
     stopCamera();
   };
 
-  // Retake Photo
   const handleRetakePhoto = () => {
     setCapturedPhoto(null);
     setPhotoTimestamp(null);
     startCamera();
   };
 
-  // Fallback File Upload
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -235,75 +227,69 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto no-print">
-      <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden my-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/90 backdrop-blur-md overflow-y-auto no-print">
+      <div className="relative w-full max-w-7xl bg-slate-900 border border-slate-700/90 rounded-2xl shadow-2xl overflow-hidden my-4">
         
-        {/* Modal Header */}
-        <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        {/* Modal Top Header */}
+        <div className="bg-gradient-to-r from-red-950 via-slate-950 to-blue-950 px-6 py-3 border-b-2 border-amber-500/60 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-amber-400" />
+            <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-400 flex items-center justify-center shrink-0 shadow">
+              <ShieldCheck className="w-6 h-6 text-amber-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <span>{formData.fullName} - पाक्षिक रिपोर्ट प्रपत्र</span>
-                <span className="text-xs px-2 py-0.5 rounded bg-blue-900/60 text-blue-300 border border-blue-700 font-mono">
+              <h2 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
+                <span>{formData.fullName} - पाक्षिक रिपोर्ट प्रपत्र (Live Data Filling View)</span>
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-900 text-blue-200 border border-blue-500 font-mono font-bold">
                   {formData.code}
                 </span>
               </h2>
-              <p className="text-xs text-slate-400">
-                चरण {step} / 2: {step === 1 ? 'अधिकारी लाइव ड्यूटी फोटो सत्यापन' : '15 दिवसीय सूचना तालिका भरें'}
+              <p className="text-xs text-slate-300 font-medium">
+                बाईं ओर लाइव फोटो सत्यापन एवं दाईं ओर प्रपत्र में लाइव डेटा प्रविष्ट करें।
               </p>
             </div>
           </div>
+
           <button
             onClick={() => { stopCamera(); onClose(); }}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Step Indicator Bar */}
-        <div className="flex border-b border-slate-800 bg-slate-950/40 px-6 py-2.5 items-center justify-between text-xs">
-          <div className={`flex items-center gap-2 font-bold ${step === 1 ? 'text-amber-400' : 'text-slate-400'}`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center font-mono ${step === 1 ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'}`}>
-              1
-            </span>
-            <span>चरण 1: फोटो कैप्चर सत्यापन</span>
-          </div>
+        {/* Hidden Canvas for Processing */}
+        <canvas ref={canvasRef} className="hidden" />
 
-          <div className="h-0.5 flex-1 bg-slate-800 mx-4 max-w-xs rounded-full">
-            <div className={`h-full bg-amber-500 transition-all ${step === 2 ? 'w-full' : 'w-1/2'}`} />
-          </div>
-
-          <div className={`flex items-center gap-2 font-bold ${step === 2 ? 'text-emerald-400' : 'text-slate-400'}`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center font-mono ${step === 2 ? 'bg-emerald-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'}`}>
-              2
-            </span>
-            <span>चरण 2: 15 दिवसीय विवरण भरें</span>
-          </div>
-        </div>
-
-        {/* STEP 1: PHOTO CAPTURE WORKFLOW */}
-        {step === 1 && (
-          <div className="p-6 md:p-8 space-y-6">
+        {/* SPLIT SCREEN MAIN CONTENT (Left: Live Camera Stream | Right: Live Form Paper & Table) */}
+        <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-950/60">
+          
+          {/* LEFT COLUMN (5/12): LIVE CAMERA CAPTURE & VERIFICATION STREAM */}
+          <div className="lg:col-span-5 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-4 shadow-xl">
             
-            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs text-slate-300 space-y-1">
-              <h3 className="text-sm font-bold text-amber-400 flex items-center gap-2">
-                <Camera className="w-4 h-4" />
-                <span>प्रथम चरण: ड्यूटी प्रभारी फोटो सत्यापन (Automatic Camera Capture)</span>
-              </h3>
-              <p className="text-slate-400">
-                फीडिंग जमा करने से पूर्व ड्यूटी अधिकारी का लाइव फोटो अथवा आधिकारिक पहचान फोटो कैप्चर करना अनिवार्य है।
+            <div className="space-y-2">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <h3 className="text-sm font-black text-amber-400 flex items-center gap-2">
+                  <Camera className="w-4 h-4 text-amber-400" />
+                  <span>चरण 1: ड्यूटी फोटो सत्यापन (Live Camera Stream)</span>
+                </h3>
+                {capturedPhoto ? (
+                  <span className="bg-emerald-950 text-emerald-300 border border-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1">
+                    <BadgeCheck className="w-3 h-3 text-emerald-400" />
+                    <span>सत्यापित</span>
+                  </span>
+                ) : (
+                  <span className="bg-amber-950 text-amber-300 border border-amber-600 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                    कैमरा लाइव
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400">
+                फीडिंग सबमिट करने से पूर्व ड्यूटी अधिकारी का लाइव फोटो लें।
               </p>
             </div>
 
-            {/* Hidden Canvas for Frame Processing */}
-            <canvas ref={canvasRef} className="hidden" />
-
-            {/* Video Preview or Captured Photo View */}
-            <div className="relative max-w-lg mx-auto bg-slate-950 border-2 border-dashed border-slate-700 rounded-2xl overflow-hidden shadow-2xl aspect-video flex flex-col items-center justify-center">
+            {/* Video Viewfinder or Captured Photo View */}
+            <div className="relative w-full bg-slate-950 border-2 border-dashed border-slate-700 rounded-xl overflow-hidden shadow-2xl aspect-video flex flex-col items-center justify-center">
               
               {!capturedPhoto ? (
                 <>
@@ -315,20 +301,19 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
                     className="w-full h-full object-cover"
                   />
 
-                  {/* Camera overlay watermark indicator */}
-                  <div className="absolute top-3 left-3 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-700 text-[10px] text-emerald-400 font-mono flex items-center gap-1.5">
+                  <div className="absolute top-3 left-3 bg-slate-950/90 px-2.5 py-1 rounded-lg border border-slate-700 text-[10px] text-emerald-400 font-mono flex items-center gap-1.5 shadow">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                    <span>LIVE WEBCAM STREAM Active</span>
+                    <span>WEBCAM STREAM LIVE</span>
                   </div>
 
-                  <div className="absolute bottom-4 inset-x-0 flex justify-center gap-3 px-4">
+                  <div className="absolute bottom-3 inset-x-0 flex justify-center px-4">
                     <button
                       type="button"
                       onClick={handleCapturePhoto}
-                      className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs rounded-xl flex items-center gap-2 shadow-xl transition-all transform hover:scale-105"
+                      className="px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs rounded-xl flex items-center gap-1.5 shadow-xl transition-all transform hover:scale-105"
                     >
                       <Camera className="w-4 h-4" />
-                      <span>📸 फोटो कैप्चर करें (Capture Photo)</span>
+                      <span>📸 फोटो कैप्चर करें (Capture)</span>
                     </button>
                   </div>
                 </>
@@ -341,7 +326,7 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
                   />
                   <div className="absolute top-3 right-3 bg-emerald-950/90 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/60 text-xs font-bold flex items-center gap-1.5 shadow-lg">
                     <BadgeCheck className="w-4 h-4 text-emerald-400" />
-                    <span>फोटो सफलतापूर्वक सत्यापित (Captured)</span>
+                    <span>फोटो सत्यापित</span>
                   </div>
                 </div>
               )}
@@ -349,204 +334,192 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
             </div>
 
             {cameraError && (
-              <div className="p-3 bg-amber-950/50 border border-amber-600/60 text-amber-200 text-xs rounded-xl flex items-center gap-2">
+              <div className="p-2.5 bg-amber-950/60 border border-amber-600/60 text-amber-200 text-xs rounded-xl flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>{cameraError}</span>
               </div>
             )}
 
-            {/* Action Bar for Step 1 */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800">
-              
-              <div className="flex flex-wrap items-center gap-2">
-                {capturedPhoto ? (
-                  <button
-                    type="button"
-                    onClick={handleRetakePhoto}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold rounded-xl text-xs flex items-center gap-1.5 border border-slate-700 transition-all"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    <span>पुनः फोटो लें (Retake)</span>
-                  </button>
-                ) : (
-                  <label className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs flex items-center gap-1.5 border border-slate-700 cursor-pointer transition-all">
+            {/* Photo Controls Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800">
+              {capturedPhoto ? (
+                <button
+                  type="button"
+                  onClick={handleRetakePhoto}
+                  className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 border border-slate-700 transition-all"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>पुनः फोटो लें (Retake Photo)</span>
+                </button>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 w-full">
+                  <label className="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs flex items-center justify-center gap-1 border border-slate-700 cursor-pointer transition-all">
                     <Upload className="w-3.5 h-3.5 text-blue-400" />
-                    <span>गैलरी / फाइल से फोटो चुनें</span>
+                    <span>फाइल अपलोड</span>
                     <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                   </label>
-                )}
-              </div>
 
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => { stopCamera(); onClose(); }}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-400 font-medium rounded-xl text-xs transition-all"
-                >
-                  रद्द करें
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => { stopCamera(); setStep(2); }}
-                  disabled={!capturedPhoto && !station.submitted}
-                  className={`px-6 py-2.5 font-bold rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-lg transition-all ${
-                    capturedPhoto || station.submitted
-                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 hover:from-amber-400 hover:to-yellow-400 cursor-pointer'
-                      : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                  }`}
-                >
-                  <span>अगला चरण: 15 दिवसीय सूचना भरें</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-
+                  <button
+                    type="button"
+                    onClick={handleGenerateDemoPhoto}
+                    className="py-2 px-3 bg-amber-950 hover:bg-amber-900 text-amber-300 font-bold rounded-xl text-xs flex items-center justify-center gap-1 border border-amber-700/60 transition-all"
+                  >
+                    <Zap className="w-3.5 h-3.5 text-amber-400" />
+                    <span>डेमो फोटो</span>
+                  </button>
+                </div>
+              )}
             </div>
 
           </div>
-        )}
 
-        {/* STEP 2: REPORT FEEDING DATA TABLE */}
-        {step === 2 && (
-          <div className="p-6 md:p-8 bg-slate-900 overflow-x-auto">
-            <form onSubmit={handleSubmit}>
+          {/* RIGHT COLUMN (7/12): LIVE FORM PAPER & DATA FEEDING TABLE */}
+          <div className="lg:col-span-7 space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               
-              {/* Printable Official Paper Card */}
-              <div className="bg-white text-slate-950 p-6 md:p-8 rounded-lg shadow-xl border border-slate-300 font-serif print-paper space-y-6">
+              {/* Printable Official Paper Card (Updates Live as user types) */}
+              <div className="bg-white text-slate-950 p-4 sm:p-6 rounded-2xl shadow-2xl border border-slate-300 font-serif print-paper space-y-4">
                 
+                <div className="border-b border-slate-300 pb-2">
+                  <h3 className="font-sans font-black text-sm text-slate-900 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-blue-600" />
+                    <span>चरण 2: 15 दिवसीय पाक्षिक रिपोर्ट प्रपत्र (Live Data Entry)</span>
+                  </h3>
+                </div>
+
                 {/* Header Title Line with Manual Date Inputs */}
-                <div className="text-center md:text-left bg-slate-50/80 p-2.5 rounded-lg border border-slate-300">
-                  <div className="flex flex-wrap items-center gap-1.5 text-sm md:text-base font-bold text-slate-900 leading-relaxed">
+                <div className="text-center md:text-left bg-slate-50 p-2.5 rounded-lg border border-slate-300">
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-900 leading-relaxed">
                     <span>दिनांक</span>
                     <input
                       type="text"
                       value={localDateRange.fromDate}
                       onChange={(e) => setLocalDateRange({ ...localDateRange, fromDate: e.target.value })}
-                      className="bg-amber-50 border border-slate-400 text-blue-900 font-extrabold text-center w-28 rounded px-1.5 py-0.5 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                      className="bg-amber-50 border border-slate-400 text-blue-900 font-extrabold text-center w-24 rounded px-1 py-0.5 focus:ring-1 focus:ring-amber-500 focus:outline-none"
                       placeholder="15.07.2026"
-                      title="गुमशुदा अवधि प्रारम्भ दिनांक (Manual Date)"
+                      title="प्रारम्भ दिनांक"
                     />
                     <span>से दिनांक</span>
                     <input
                       type="text"
                       value={localDateRange.toDate}
                       onChange={(e) => setLocalDateRange({ ...localDateRange, toDate: e.target.value })}
-                      className="bg-amber-50 border border-slate-400 text-blue-900 font-extrabold text-center w-28 rounded px-1.5 py-0.5 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                      className="bg-amber-50 border border-slate-400 text-blue-900 font-extrabold text-center w-24 rounded px-1 py-0.5 focus:ring-1 focus:ring-amber-500 focus:outline-none"
                       placeholder="31.07.2026"
-                      title="गुमशुदा अवधि अंतिम दिनांक (Manual Date)"
+                      title="अंतिम दिनांक"
                     />
                     <span>तक गुमशुदा, अज्ञात व्यक्तियों के सम्बन्ध में {formData.fullName} से सूचना निम्नवत है:-</span>
                   </div>
                 </div>
 
-                {/* Main Feeding Table */}
-                <div className="overflow-x-auto my-4">
-                  <table className="w-full border-collapse border-2 border-slate-900 text-center text-sm md:text-base">
+                {/* Main Live Feeding Table */}
+                <div className="overflow-x-auto my-2">
+                  <table className="w-full border-collapse border-2 border-slate-900 text-center text-xs sm:text-sm">
                     <thead>
                       <tr className="bg-slate-100 text-slate-900 font-bold border-b-2 border-slate-900">
-                        <th className="border border-slate-900 px-3 py-2.5 w-1/6">कमिश्नरेट/जोन</th>
-                        <th className="border border-slate-900 px-3 py-2.5 w-1/5">जनपद</th>
-                        <th className="border border-slate-900 px-2 py-2.5" colSpan={2}>
+                        <th className="border border-slate-900 px-2 py-2 w-1/6">कमिश्नरेट/जोन</th>
+                        <th className="border border-slate-900 px-2 py-2 w-1/5">जनपद</th>
+                        <th className="border border-slate-900 px-1 py-2" colSpan={2}>
                           अज्ञात शव
                         </th>
-                        <th className="border border-slate-900 px-2 py-2.5" colSpan={2}>
+                        <th className="border border-slate-900 px-1 py-2" colSpan={2}>
                           गुमशुदा व्यक्ति
                         </th>
-                        <th className="border border-slate-900 px-2 py-2.5" colSpan={2}>
+                        <th className="border border-slate-900 px-1 py-2" colSpan={2}>
                           गुमशुदा बच्चों की संख्या
                         </th>
-                        <th className="border border-slate-900 px-3 py-2.5 w-1/6">शेष विवरण</th>
+                        <th className="border border-slate-900 px-2 py-2 w-1/6">शेष विवरण</th>
                       </tr>
-                      <tr className="bg-slate-50 text-slate-800 font-semibold border-b-2 border-slate-900 text-xs md:text-sm">
-                        <th className="border border-slate-900 px-2 py-1"></th>
-                        <th className="border border-slate-900 px-2 py-1"></th>
-                        <th className="border border-slate-900 px-2 py-1 bg-amber-50">पुरुष</th>
-                        <th className="border border-slate-900 px-2 py-1 bg-amber-50">महिला</th>
-                        <th className="border border-slate-900 px-2 py-1 bg-blue-50">पुरुष</th>
-                        <th className="border border-slate-900 px-2 py-1 bg-blue-50">महिला</th>
-                        <th className="border border-slate-900 px-2 py-1 bg-purple-50">पुरुष</th>
-                        <th className="border border-slate-900 px-2 py-1 bg-purple-50">महिला</th>
-                        <th className="border border-slate-900 px-2 py-1"></th>
+                      <tr className="bg-slate-50 text-slate-800 font-semibold border-b-2 border-slate-900 text-[11px] sm:text-xs">
+                        <th className="border border-slate-900"></th>
+                        <th className="border border-slate-900"></th>
+                        <th className="border border-slate-900 px-1 py-1 bg-amber-50">पुरुष</th>
+                        <th className="border border-slate-900 px-1 py-1 bg-amber-50">महिला</th>
+                        <th className="border border-slate-900 px-1 py-1 bg-blue-50">पुरुष</th>
+                        <th className="border border-slate-900 px-1 py-1 bg-blue-50">महिला</th>
+                        <th className="border border-slate-900 px-1 py-1 bg-purple-50">पुरुष</th>
+                        <th className="border border-slate-900 px-1 py-1 bg-purple-50">महिला</th>
+                        <th className="border border-slate-900"></th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr className="text-slate-900 font-medium border-b border-slate-900">
                         
-                        <td className="border border-slate-900 px-3 py-3 align-middle font-bold">
+                        <td className="border border-slate-900 px-2 py-2.5 align-middle font-bold text-xs">
                           {formData.zone}
                         </td>
 
-                        <td className="border border-slate-900 px-3 py-3 align-middle font-bold text-xs md:text-sm">
+                        <td className="border border-slate-900 px-2 py-2.5 align-middle font-bold text-xs">
                           {formData.district}
                         </td>
 
-                        {/* Inputs */}
-                        <td className="border border-slate-900 p-1 align-middle bg-amber-50/50">
+                        {/* Interactive Data Inputs updating paper live */}
+                        <td className="border border-slate-900 p-0.5 align-middle bg-amber-50/60">
                           <input
                             type="number"
                             min="0"
                             value={formData.unknownBodiesMale}
                             onChange={(e) => handleChange('unknownBodiesMale', parseInt(e.target.value) || 0)}
-                            className="w-full text-center font-bold text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                            className="w-full text-center font-black text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                           />
                         </td>
 
-                        <td className="border border-slate-900 p-1 align-middle bg-amber-50/50">
+                        <td className="border border-slate-900 p-0.5 align-middle bg-amber-50/60">
                           <input
                             type="number"
                             min="0"
                             value={formData.unknownBodiesFemale}
                             onChange={(e) => handleChange('unknownBodiesFemale', parseInt(e.target.value) || 0)}
-                            className="w-full text-center font-bold text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                            className="w-full text-center font-black text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-amber-500 focus:outline-none"
                           />
                         </td>
 
-                        <td className="border border-slate-900 p-1 align-middle bg-blue-50/50">
+                        <td className="border border-slate-900 p-0.5 align-middle bg-blue-50/60">
                           <input
                             type="number"
                             min="0"
                             value={formData.missingPersonsMale}
                             onChange={(e) => handleChange('missingPersonsMale', parseInt(e.target.value) || 0)}
-                            className="w-full text-center font-bold text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="w-full text-center font-black text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                           />
                         </td>
 
-                        <td className="border border-slate-900 p-1 align-middle bg-blue-50/50">
+                        <td className="border border-slate-900 p-0.5 align-middle bg-blue-50/60">
                           <input
                             type="number"
                             min="0"
                             value={formData.missingPersonsFemale}
                             onChange={(e) => handleChange('missingPersonsFemale', parseInt(e.target.value) || 0)}
-                            className="w-full text-center font-bold text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            className="w-full text-center font-black text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                           />
                         </td>
 
-                        <td className="border border-slate-900 p-1 align-middle bg-purple-50/50">
+                        <td className="border border-slate-900 p-0.5 align-middle bg-purple-50/60">
                           <input
                             type="number"
                             min="0"
                             value={formData.missingChildrenMale}
                             onChange={(e) => handleChange('missingChildrenMale', parseInt(e.target.value) || 0)}
-                            className="w-full text-center font-bold text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                            className="w-full text-center font-black text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-purple-500 focus:outline-none"
                           />
                         </td>
 
-                        <td className="border border-slate-900 p-1 align-middle bg-purple-50/50">
+                        <td className="border border-slate-900 p-0.5 align-middle bg-purple-50/60">
                           <input
                             type="number"
                             min="0"
                             value={formData.missingChildrenFemale}
                             onChange={(e) => handleChange('missingChildrenFemale', parseInt(e.target.value) || 0)}
-                            className="w-full text-center font-bold text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                            className="w-full text-center font-black text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-purple-500 focus:outline-none"
                           />
                         </td>
 
-                        <td className="border border-slate-900 p-1 align-middle">
+                        <td className="border border-slate-900 p-0.5 align-middle">
                           <input
                             type="text"
                             value={formData.remarks}
                             onChange={(e) => handleChange('remarks', e.target.value)}
-                            className="w-full text-center font-medium text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-slate-500 focus:outline-none"
+                            className="w-full text-center font-bold text-slate-900 bg-white border border-slate-400 rounded py-1 focus:ring-2 focus:ring-slate-500 focus:outline-none text-xs"
                             placeholder="निल"
                           />
                         </td>
@@ -556,85 +529,72 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
                   </table>
                 </div>
 
-                <div className="text-slate-900 font-medium">
-                  <p className="text-base">रिपोर्ट सादर सेवा मे प्रेषित है।</p>
+                <div className="text-slate-900 font-medium text-xs">
+                  <p>रिपोर्ट सादर सेवा मे प्रेषित है।</p>
                 </div>
 
                 {/* Verification Photo Thumbnail & Seal Block */}
-                <div className="flex flex-wrap items-end justify-between gap-4 pt-4 border-t border-slate-300">
+                <div className="flex flex-wrap items-end justify-between gap-3 pt-3 border-t border-slate-300">
                   
-                  {/* Duty Photo Badge */}
+                  {/* Duty Photo Badge Thumbnail */}
                   {capturedPhoto ? (
-                    <div className="flex items-center space-x-3 bg-slate-50 p-2 rounded-xl border border-slate-300">
+                    <div className="flex items-center space-x-2.5 bg-slate-50 p-1.5 rounded-xl border border-slate-300">
                       <img
                         src={capturedPhoto}
                         alt="Captured Officer"
-                        className="w-16 h-16 object-cover rounded-lg border border-slate-400 shadow-md"
+                        className="w-12 h-12 object-cover rounded-lg border border-slate-400 shadow-sm"
                       />
-                      <div className="text-xs font-sans">
+                      <div className="text-[11px] font-sans">
                         <span className="font-bold text-emerald-700 block flex items-center gap-1">
-                          <BadgeCheck className="w-4 h-4 text-emerald-600" />
-                          ड्यूटी अधिकारी फोटो सत्यापन
+                          <BadgeCheck className="w-3.5 h-3.5 text-emerald-600" />
+                          फोटो सत्यापन संलग्न
                         </span>
-                        <span className="text-[10px] text-slate-600 font-mono block">
+                        <span className="text-[9px] text-slate-600 font-mono block">
                           {photoTimestamp || 'सत्यापित'}
                         </span>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-xs text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200 font-sans">
-                      ⚠️ फोटो सत्यापन संलग्न नहीं है
+                    <div className="text-[11px] text-amber-800 bg-amber-50 px-2 py-1 rounded border border-amber-200 font-sans">
+                      ⚠️ फोटो सत्यापन संलग्न करें
                     </div>
                   )}
 
-                  {/* Stamp Signature Block with Manual Date */}
-                  <div className="text-right space-y-1 relative pr-4">
-                    <div className="font-serif italic font-bold text-blue-900 text-base md:text-lg border-b border-blue-900 inline-flex items-center justify-end gap-1 pb-0.5 px-2">
+                  {/* Stamp Signature Block */}
+                  <div className="text-right space-y-0.5 relative pr-2">
+                    <div className="font-serif italic font-bold text-blue-900 text-xs sm:text-sm border-b border-blue-900 inline-flex items-center justify-end gap-1 pb-0.5 px-2">
                       <span>Sho.</span>
                       <input
                         type="text"
                         value={localDateRange.letterDate}
                         onChange={(e) => setLocalDateRange({ ...localDateRange, letterDate: e.target.value })}
-                        className="bg-amber-50/60 border border-slate-400 text-blue-900 font-bold text-center w-28 rounded px-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="bg-amber-50/60 border border-slate-400 text-blue-900 font-bold text-center w-24 rounded px-1 focus:outline-none"
                         placeholder="01.08.2026"
-                        title="थाना प्रपत्र दिनांक (Manual Date)"
                       />
                     </div>
-                    <p className="font-bold text-slate-900 text-sm leading-snug">प्रभारी निरीक्षक</p>
-                    <p className="font-bold text-slate-900 text-sm leading-snug">{formData.fullName}</p>
-                    <p className="font-bold text-slate-900 text-sm leading-snug">जनपद अयोध्या</p>
+                    <p className="font-bold text-slate-900 text-xs leading-snug">प्रभारी निरीक्षक</p>
+                    <p className="font-bold text-slate-900 text-xs leading-snug">{formData.fullName}</p>
                   </div>
 
                 </div>
 
               </div>
 
-              {/* Step 2 Action Buttons */}
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-800">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold rounded-xl text-xs flex items-center gap-1.5 border border-slate-700 transition-all"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>चरण 1: फोटो बदलें</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handlePrint}
-                    className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium rounded-xl text-xs flex items-center gap-2 border border-slate-700 transition-all"
-                  >
-                    <Printer className="w-4 h-4 text-slate-400" />
-                    <span>प्रिंट प्रपत्र</span>
-                  </button>
-                </div>
+              {/* Action Buttons Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium rounded-xl text-xs flex items-center gap-2 border border-slate-700 transition-all"
+                >
+                  <Printer className="w-4 h-4 text-slate-400" />
+                  <span>प्रिंट प्रपत्र (Print)</span>
+                </button>
 
                 <div className="flex items-center space-x-3">
                   <button
                     type="button"
-                    onClick={onClose}
+                    onClick={() => { stopCamera(); onClose(); }}
                     className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-xl text-xs transition-all"
                   >
                     रद्द करें
@@ -642,7 +602,7 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
 
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-emerald-950/50 transition-all"
+                    className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white font-black rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-emerald-950/50 transition-all transform hover:scale-[1.01]"
                   >
                     <CheckCircle className="w-4 h-4" />
                     <span>फीडिंग जमा करें (Submit & Turn GREEN)</span>
@@ -652,7 +612,8 @@ export const PSFormModal: React.FC<PSFormModalProps> = ({
 
             </form>
           </div>
-        )}
+
+        </div>
 
       </div>
     </div>
