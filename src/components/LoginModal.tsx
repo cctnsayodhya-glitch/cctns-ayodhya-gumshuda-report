@@ -61,22 +61,27 @@ export const LoginModal: React.FC<LoginModalProps> = ({ stations, onLogin, onClo
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/98 backdrop-blur-md overflow-y-auto no-print min-h-screen">
       <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden my-6">
         
-        {/* Brand Top Header */}
-        <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-6 text-center border-b border-slate-800 relative">
-          <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-tr from-amber-600 via-yellow-500 to-red-600 flex items-center justify-center p-0.5 shadow-xl shadow-amber-500/20 mb-3">
-            <div className="w-full h-full bg-slate-950 rounded-full flex items-center justify-center border border-amber-400/40">
-              <Shield className="w-9 h-9 text-amber-400" />
+        {/* Brand Top Header with Official UP Police Shield Logo & Red-Navy Blue Theme */}
+        <div className="bg-gradient-to-r from-red-950 via-slate-950 to-blue-950 p-6 text-center border-b-2 border-amber-500/50 relative">
+          <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-tr from-red-600 via-amber-500 to-blue-600 flex items-center justify-center p-1 shadow-2xl shadow-red-900/50 mb-3">
+            <div className="w-full h-full bg-slate-950 rounded-full flex flex-col items-center justify-center border-2 border-amber-400 relative overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-1/2 bg-red-900/60" />
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-blue-950/80" />
+              <Shield className="w-10 h-10 text-amber-400 z-10 drop-shadow-md" />
+              <span className="text-[9px] font-black text-white z-10 tracking-widest leading-none bg-red-900/90 px-1.5 py-0.5 rounded border border-amber-400/60 mt-0.5">
+                UPP
+              </span>
             </div>
           </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-950/80 border border-amber-500/50 text-[11px] font-bold text-amber-300 mb-1">
-            <Sparkles className="w-3 h-3 text-amber-400" />
-            <span>CCTNS AYODHYA SECURE PORTAL</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/90 border border-amber-500/60 text-[11px] font-black text-amber-300 mb-1.5 shadow-inner">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>उत्तर प्रदेश पुलिस • जनपद अयोध्या CCTNS पोर्टल</span>
           </div>
-          <h2 className="text-xl font-black text-white tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
             कार्यालय वरिष्ठ पुलिस अधीक्षक, जनपद अयोध्या
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            15 दिवसीय पाक्षिक गुमशुदा एवं अज्ञात शव पोर्टल - प्रवेश द्वार
+          <p className="text-xs text-slate-300 mt-1 font-medium">
+            15 दिवसीय पाक्षिक गुमशुदा एवं अज्ञात शव सूचना प्रविष्ट प्रणाली
           </p>
         </div>
 

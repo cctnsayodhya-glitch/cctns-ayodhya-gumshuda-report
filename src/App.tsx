@@ -169,6 +169,7 @@ export const App: React.FC = () => {
       <Header
         dateRange={dateRange}
         setDateRange={setDateRange}
+        stations={stations}
         completedCount={completedCount}
         totalCount={stations.length}
         authSession={authSession}

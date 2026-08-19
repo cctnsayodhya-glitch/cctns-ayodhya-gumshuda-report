@@ -1,11 +1,12 @@
 import React from 'react';
-import { Shield, PhoneCall, Calendar, FileText, UserCheck, Building2, Lock, Table, Info } from 'lucide-react';
-import { DateRange, AuthSession } from '../types/report';
-import { GOOGLE_SHEET_URL } from '../utils/googleSheets';
+import { Shield, PhoneCall, Calendar, FileText, UserCheck, Building2, Lock, Table, Info, Download } from 'lucide-react';
+import { DateRange, AuthSession, StationData } from '../types/report';
+import { GOOGLE_SHEET_URL, downloadSpreadsheetCSV } from '../utils/googleSheets';
 
 interface HeaderProps {
   dateRange: DateRange;
   setDateRange: (range: DateRange) => void;
+  stations: StationData[];
   completedCount: number;
   totalCount: number;
   authSession: AuthSession | null;
@@ -19,6 +20,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   dateRange,
   setDateRange,
+  stations,
   completedCount,
   totalCount,
   authSession,
@@ -32,55 +34,53 @@ export const Header: React.FC<HeaderProps> = ({
   const isPSUser = authSession?.role === 'PS_USER';
 
   return (
-    <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl no-print">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+    <header className="bg-slate-900 border-b-2 border-red-800/80 sticky top-0 z-40 shadow-2xl no-print">
+      {/* Top Police Red & Blue Ribbon Accent Line */}
+      <div className="h-1 w-full bg-gradient-to-r from-red-600 via-amber-500 to-blue-600" />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-3">
           
           {/* Brand & Emblem */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3.5">
             <div className="relative">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-600 via-yellow-500 to-red-600 flex items-center justify-center p-0.5 shadow-lg shadow-amber-500/20">
-                <div className="w-full h-full bg-slate-950 rounded-full flex items-center justify-center border border-amber-400/40">
-                  <Shield className="w-8 h-8 text-amber-400" />
+              <div className="w-13 h-13 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-red-600 via-amber-500 to-blue-600 flex items-center justify-center p-0.5 shadow-lg shadow-red-900/40">
+                <div className="w-full h-full bg-slate-950 rounded-full flex flex-col items-center justify-center border border-amber-400/60 relative overflow-hidden">
+                  <Shield className="w-7 h-7 sm:w-8 sm:h-8 text-amber-400" />
                 </div>
               </div>
-              <span className="absolute -bottom-1 -right-1 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-slate-900">
+              <span className="absolute -bottom-1 -right-1 bg-red-700 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border border-slate-950 shadow">
                 UPP
               </span>
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="bg-red-900/60 text-red-300 text-xs font-semibold px-2 py-0.5 rounded border border-red-700/50">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="bg-red-900/80 text-red-200 text-[11px] font-black px-2 py-0.5 rounded border border-red-600/70 shadow-sm">
                   CCTNS AYODHYA
                 </span>
-                <span className="bg-amber-900/40 text-amber-300 text-xs font-semibold px-2 py-0.5 rounded border border-amber-700/50">
+                <span className="bg-blue-900/70 text-blue-200 text-[11px] font-extrabold px-2 py-0.5 rounded border border-blue-600/60 shadow-sm">
                   उत्तर प्रदेश पुलिस
                 </span>
 
                 {/* Role Badge Indicator */}
                 {isAdmin && (
-                  <span className="bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 text-xs font-black px-2.5 py-0.5 rounded-full shadow flex items-center gap-1">
+                  <span className="bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 text-[11px] font-black px-2.5 py-0.5 rounded-full shadow flex items-center gap-1">
                     <UserCheck className="w-3 h-3" />
                     <span>SSP ADMIN</span>
                   </span>
                 )}
 
                 {isPSUser && (
-                  <span className="bg-blue-900/80 text-blue-200 text-xs font-bold px-2.5 py-0.5 rounded-full border border-blue-600 flex items-center gap-1">
-                    <Building2 className="w-3 h-3 text-blue-400" />
+                  <span className="bg-blue-900/90 text-blue-100 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-blue-500 flex items-center gap-1">
+                    <Building2 className="w-3 h-3 text-blue-300" />
                     <span>{authSession.stationName || 'थाना पोर्टल'}</span>
                   </span>
                 )}
               </div>
 
-              <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-white mt-0.5">
-                जनपद अयोध्या - 15 दिवसीय गुमशुदा एवं अज्ञात शव डैशबोर्ड
+              <h1 className="text-base sm:text-xl font-black tracking-tight text-white mt-0.5">
+                जनपद अयोध्या - 15 दिवसीय गुमशुदा एवं अज्ञात शव पोर्टल
               </h1>
-              <p className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
-                <span>कार्यालय वरिष्ठ पुलिस अधीक्षक, जनपद अयोध्या</span>
-                <span>•</span>
-                <span className="text-amber-400 font-medium">{totalCount} थाना सम्बद्ध</span>
-              </p>
             </div>
           </div>
 
@@ -88,9 +88,9 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             
             {/* Date Range Selector Pill with all 4 manual format inputs */}
-            <div className="flex flex-wrap items-center bg-slate-950 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-300 gap-2">
+            <div className="flex flex-wrap items-center bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-xs text-slate-300 gap-1.5">
               <div className="flex items-center space-x-1">
-                <Calendar className="w-4 h-4 text-amber-400 shrink-0" />
+                <Calendar className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                 <span className="text-[10px] font-bold text-slate-400 uppercase">अवधि:</span>
                 <input
                   type="text"
@@ -111,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({
                 />
               </div>
 
-              <div className="flex items-center space-x-1 pl-2 border-l border-slate-800">
+              <div className="flex items-center space-x-1 pl-1.5 border-l border-slate-800">
                 <span className="text-[10px] font-bold text-amber-400 uppercase">पत्र तिथि:</span>
                 <input
                   type="text"
@@ -123,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
                 />
               </div>
 
-              <div className="hidden sm:flex items-center space-x-1 pl-2 border-l border-slate-800">
+              <div className="hidden sm:flex items-center space-x-1 pl-1.5 border-l border-slate-800">
                 <span className="text-[10px] font-bold text-blue-400 uppercase">पत्र सं०:</span>
                 <input
                   type="text"
@@ -135,6 +135,16 @@ export const Header: React.FC<HeaderProps> = ({
                 />
               </div>
             </div>
+
+            {/* Direct CSV Spreadsheet Download Button with Headers */}
+            <button
+              onClick={() => downloadSpreadsheetCSV(stations, dateRange)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-950 hover:bg-blue-900 border border-blue-600/80 rounded-lg text-xs font-bold text-blue-200 transition-all shadow-sm"
+              title="Download 19 Police Stations CSV Spreadsheet with Header Row"
+            >
+              <Download className="w-3.5 h-3.5 text-blue-400" />
+              <span>CSV स्प्रेडशीट</span>
+            </button>
 
             {/* Google Sheets Link Button */}
             <a
